@@ -123,6 +123,7 @@ main {
 #sessions {
   display: flex;
   flex-shrink: 0;
+  margin-left: auto; /* 1段目の右端に寄せる */
   align-items: center;
   gap: 6px;
   font-size: 0.85rem;
@@ -151,5 +152,6 @@ main {
   #sessions {
     order: 5; /* 狭い画面では通貨ペアの下(3段目)に回す */
     flex-basis: 100%;
+    justify-content: flex-end;
   }
 }
