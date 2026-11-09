@@ -283,6 +283,61 @@ function tickClock() {
 tickClock();
 setInterval(tickClock, 1000);
 
+// 画面スリープの防止(Screen Wake Lock API)。非対応のブラウザではボタンを出さない
+const WAKE_KEY = "fx-dashboard:wake";
+const wakeToggle = document.getElementById("wake-toggle");
+let wakeLock = null;
+
+function wakeWanted() {
+  try {
+    return localStorage.getItem(WAKE_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function setWakeWanted(on) {
+  try {
+    localStorage.setItem(WAKE_KEY, on ? "1" : "0");
+  } catch {}
+}
+
+function renderWake() {
+  const on = wakeWanted();
+  wakeToggle.setAttribute("aria-pressed", String(on));
+  wakeToggle.title = `画面を消さない(${on ? "オン" : "オフ"})`;
+}
+
+async function acquireWake() {
+  if (!wakeWanted() || wakeLock || document.visibilityState !== "visible") return;
+  try {
+    wakeLock = await navigator.wakeLock.request("screen");
+    wakeLock.addEventListener("release", () => {
+      wakeLock = null;
+    });
+  } catch {
+    // 省電力モードなどで取得できない場合は、オンのままにせずオフに戻す
+    wakeLock = null;
+    setWakeWanted(false);
+    renderWake();
+  }
+}
+
+if ("wakeLock" in navigator) {
+  wakeToggle.hidden = false;
+  wakeToggle.addEventListener("click", () => {
+    const on = !wakeWanted();
+    setWakeWanted(on);
+    renderWake();
+    if (on) acquireWake();
+    else wakeLock?.release();
+  });
+  // タブを隠すとロックは自動で解除されるので、戻ってきたときに取り直す
+  document.addEventListener("visibilitychange", acquireWake);
+  renderWake();
+  acquireWake();
+}
+
 // PWA: Service Worker を登録(インストール可能にする)
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("sw.js").catch(() => {});

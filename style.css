@@ -173,3 +173,34 @@ main {
     display: none;
   }
 }
+
+/* 画面スリープ防止のボタン(Material Symbols の visibility アイコン) */
+#wake-toggle {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: var(--muted);
+  color: inherit;
+  cursor: pointer;
+}
+
+#wake-toggle[hidden] {
+  display: none;
+}
+
+#wake-toggle[aria-pressed="true"] {
+  background: var(--accent);
+  color: #fff;
+}
+
+@media (max-width: 600px) {
+  #wake-toggle {
+    margin-left: auto; /* 時計が3段目に回るので、1段目の右端に置く */
+  }
+}
