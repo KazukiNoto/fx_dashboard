@@ -217,3 +217,8 @@ window.addEventListener("keydown", (e) => {
 window.addEventListener("hashchange", update);
 darkQuery.addEventListener("change", update);
 update();
+
+// PWA: Service Worker を登録(インストール可能にする)
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("sw.js").catch(() => {});
+}
