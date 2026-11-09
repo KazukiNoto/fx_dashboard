@@ -85,3 +85,22 @@ main {
 #chart {
   grid-template-rows: minmax(320px, 1fr) minmax(320px, 1fr);
 }
+
+/* 各ペインの時間足ラベル(チャート左上に重ねる) */
+#chart .tradingview-widget-container {
+  position: relative;
+}
+
+.interval-label {
+  position: absolute;
+  top: 8px;
+  left: 10px;
+  z-index: 1;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: var(--muted);
+  color: var(--fg);
+  font-size: 0.8rem;
+  opacity: 0.85;
+  pointer-events: none;
+}

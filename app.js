@@ -29,7 +29,7 @@ function currentPair() {
   );
 }
 
-function mountWidget(parent, pair, interval) {
+function mountWidget(parent, pair, interval, label) {
   const container = document.createElement("div");
   container.className = "tradingview-widget-container";
   const widget = document.createElement("div");
@@ -57,14 +57,19 @@ function mountWidget(parent, pair, interval) {
     support_host: "https://www.tradingview.com",
   });
   container.append(script);
+
+  const badge = document.createElement("span");
+  badge.className = "interval-label";
+  badge.textContent = label;
+  container.append(badge);
   parent.append(container);
 }
 
 // 指定ペアを上下2ペインで表示(上: 5分足 / 下: 30分足)
 function renderChart(pair) {
   chartEl.replaceChildren();
-  mountWidget(chartEl, pair, "5");
-  mountWidget(chartEl, pair, "30");
+  mountWidget(chartEl, pair, "5", "5分足");
+  mountWidget(chartEl, pair, "30", "30分足");
 }
 
 function renderNav(active) {
