@@ -46,11 +46,12 @@ function mountWidget(parent, pair, interval) {
     interval,
     timezone: "Asia/Tokyo",
     theme: darkQuery.matches ? "dark" : "light",
-    style: "1",
+    style: "8", // 平均足(1: ローソク足)
     locale: "ja",
     allow_symbol_change: false,
     hide_side_toolbar: true,
     hide_top_toolbar: true,
+    hide_legend: true,
     hide_volume: true,
     studies: ["STD;MACD"],
     support_host: "https://www.tradingview.com",
