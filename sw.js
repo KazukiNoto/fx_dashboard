@@ -9,6 +9,10 @@ const SHELL = [
   "manifest.webmanifest",
   "icons/icon-192.png",
   "icons/icon-512.png",
+  "flags/us.svg",
+  "flags/eu.svg",
+  "flags/gb.svg",
+  "flags/au.svg",
 ];
 
 self.addEventListener("install", (event) => {

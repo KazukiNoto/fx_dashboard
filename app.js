@@ -1,8 +1,8 @@
 const PAIRS = [
-  { label: "USD/JPY", flag: "🇺🇸", symbol: "FX_IDC:USDJPY" },
-  { label: "EUR/JPY", flag: "🇪🇺", symbol: "FX_IDC:EURJPY" },
-  { label: "GBP/JPY", flag: "🇬🇧", symbol: "FX_IDC:GBPJPY" },
-  { label: "AUD/JPY", flag: "🇦🇺", symbol: "FX_IDC:AUDJPY" },
+  { label: "USD/JPY", flag: "us", symbol: "FX_IDC:USDJPY" },
+  { label: "EUR/JPY", flag: "eu", symbol: "FX_IDC:EURJPY" },
+  { label: "GBP/JPY", flag: "gb", symbol: "FX_IDC:GBPJPY" },
+  { label: "AUD/JPY", flag: "au", symbol: "FX_IDC:AUDJPY" },
 ];
 
 const chartEl = document.getElementById("chart");
@@ -123,7 +123,11 @@ function renderNav(active) {
     ...PAIRS.map((pair) => {
       const button = document.createElement("button");
       button.type = "button";
-      button.textContent = `${pair.flag} ${pair.label}`;
+      const flag = document.createElement("img");
+      flag.src = `flags/${pair.flag}.svg`;
+      flag.alt = "";
+      flag.className = "flag";
+      button.append(flag, pair.label);
       button.title = `${pair.label}(キー ${PAIRS.indexOf(pair) + 1})`;
       button.setAttribute("aria-pressed", String(pair === active));
       button.addEventListener("click", () => {
