@@ -197,16 +197,3 @@ main {
     flex-basis: 100%;
   }
 }
-
-/* 価格一覧(ティッカーテープ)の帯 */
-#ticker {
-  flex-shrink: 0;
-  height: 46px;
-  overflow: hidden;
-}
-
-#ticker .tradingview-widget-container,
-#ticker .tradingview-widget-container__widget {
-  height: 100%;
-  width: 100%;
-}

@@ -201,36 +201,6 @@ calendarToggle.addEventListener("click", () => {
   renderCalendar();
 });
 
-// 価格一覧(TradingView Ticker Tape ウィジェット)。表示ペアは PAIRS から作る
-const tickerEl = document.getElementById("ticker");
-let tickerTheme = null; // 現在マウントしているウィジェットのテーマ
-
-function renderTicker() {
-  const theme = darkQuery.matches ? "dark" : "light";
-  if (tickerTheme === theme) return; // ペア切替では再読み込みしない
-  tickerTheme = theme;
-
-  const container = document.createElement("div");
-  container.className = "tradingview-widget-container";
-  const widget = document.createElement("div");
-  widget.className = "tradingview-widget-container__widget";
-  container.append(widget);
-  const script = document.createElement("script");
-  script.src =
-    "https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js";
-  script.async = true;
-  script.textContent = JSON.stringify({
-    symbols: PAIRS.map((p) => ({ proName: p.symbol, title: p.label })),
-    showSymbolLogo: false,
-    colorTheme: theme,
-    isTransparent: true,
-    displayMode: "adaptive",
-    locale: "ja",
-  });
-  container.append(script);
-  tickerEl.replaceChildren(container);
-}
-
 function update() {
   const pair = currentPair();
   document.title = `${pair.label} | FX Dashboard`;
@@ -243,7 +213,6 @@ function update() {
     ?.scrollIntoView({ block: "nearest", inline: "nearest" });
   renderChart(pair);
   renderCalendar();
-  renderTicker();
 }
 
 // 数字キー 1〜4 で通貨ペアを切り替え
