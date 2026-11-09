@@ -1,0 +1,74 @@
+:root {
+  --bg: #ffffff;
+  --fg: #1a1a1a;
+  --muted: #e8e8ec;
+  --accent: #2962ff;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #131722;
+    --fg: #e6e6e6;
+    --muted: #2a2e39;
+  }
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: system-ui, -apple-system, "Hiragino Sans", sans-serif;
+}
+
+header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  padding: 8px 16px;
+}
+
+h1 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+#pairs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+#pairs button {
+  padding: 4px 12px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--muted);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+#pairs button[aria-pressed="true"] {
+  background: var(--accent);
+  color: #fff;
+}
+
+main {
+  flex: 1;
+  min-height: 0;
+}
+
+#chart,
+#chart .tradingview-widget-container__widget {
+  height: 100%;
+  width: 100%;
+}
