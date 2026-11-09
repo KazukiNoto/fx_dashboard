@@ -126,6 +126,17 @@ function renderNav(active) {
   );
 }
 
+// マウスホイールの縦回転でも、ペアのボタン列を横スクロールできるようにする
+navEl.addEventListener(
+  "wheel",
+  (e) => {
+    if (e.deltaX !== 0 || navEl.scrollWidth <= navEl.clientWidth) return;
+    e.preventDefault();
+    navEl.scrollLeft += e.deltaY;
+  },
+  { passive: false }
+);
+
 function update() {
   const pair = currentPair();
   document.title = `${pair.label} | FX Dashboard`;
@@ -133,6 +144,9 @@ function update() {
     localStorage.setItem(STORAGE_KEY, pair.label);
   } catch {}
   renderNav(pair);
+  navEl
+    .querySelector('[aria-pressed="true"]')
+    ?.scrollIntoView({ block: "nearest", inline: "nearest" });
   renderChart(pair);
 }
 

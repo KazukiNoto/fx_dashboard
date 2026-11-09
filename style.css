@@ -41,13 +41,20 @@ h1 {
   font-size: 1.1rem;
 }
 
+/* ペアが増えても1行に収め、横スクロールで選ぶ */
 #pairs {
   display: flex;
-  flex-wrap: wrap;
+  flex: 1 1 0;
+  min-width: 0;
   gap: 6px;
+  padding-bottom: 4px;
+  overflow-x: auto;
+  scrollbar-width: thin;
 }
 
 #pairs button {
+  flex-shrink: 0;
+  white-space: nowrap;
   padding: 4px 12px;
   border: 0;
   border-radius: 999px;
