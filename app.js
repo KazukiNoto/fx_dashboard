@@ -9,9 +9,24 @@ const chartEl = document.getElementById("chart");
 const navEl = document.getElementById("pairs");
 const darkQuery = window.matchMedia("(prefers-color-scheme: dark)");
 
+const STORAGE_KEY = "fx-dashboard:pair";
+
+function savedLabel() {
+  try {
+    return localStorage.getItem(STORAGE_KEY);
+  } catch {
+    return null;
+  }
+}
+
+// 優先順位: URLハッシュ > 前回の選択 > 既定(USD/JPY)
 function currentPair() {
-  const label = decodeURIComponent(location.hash.slice(1));
-  return PAIRS.find((p) => p.label === label) ?? PAIRS[0];
+  const hash = decodeURIComponent(location.hash.slice(1));
+  return (
+    PAIRS.find((p) => p.label === hash) ??
+    PAIRS.find((p) => p.label === savedLabel()) ??
+    PAIRS[0]
+  );
 }
 
 function mountWidget(parent, pair, interval) {
@@ -56,6 +71,7 @@ function renderNav(active) {
       const button = document.createElement("button");
       button.type = "button";
       button.textContent = `${pair.flag} ${pair.label}`;
+      button.title = `${pair.label}(キー ${PAIRS.indexOf(pair) + 1})`;
       button.setAttribute("aria-pressed", String(pair === active));
       button.addEventListener("click", () => {
         location.hash = encodeURIComponent(pair.label);
@@ -67,9 +83,20 @@ function renderNav(active) {
 
 function update() {
   const pair = currentPair();
+  document.title = `${pair.label} | FX Dashboard`;
+  try {
+    localStorage.setItem(STORAGE_KEY, pair.label);
+  } catch {}
   renderNav(pair);
   renderChart(pair);
 }
+
+// 数字キー 1〜4 で通貨ペアを切り替え
+window.addEventListener("keydown", (e) => {
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  const pair = PAIRS[Number(e.key) - 1];
+  if (pair) location.hash = encodeURIComponent(pair.label);
+});
 
 window.addEventListener("hashchange", update);
 darkQuery.addEventListener("change", update);

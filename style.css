@@ -80,3 +80,8 @@ main {
   grid-template-rows: 1fr 1fr;
   gap: 4px;
 }
+
+/* 画面が低い・狭い場合も各チャートが潰れないようにし、main をスクロールさせる */
+#chart {
+  grid-template-rows: minmax(320px, 1fr) minmax(320px, 1fr);
+}
