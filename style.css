@@ -45,7 +45,8 @@ h1 {
 /* ペアが増えても1行に収め、横スクロールで選ぶ */
 #pairs {
   display: flex;
-  flex: 1 1 0;
+  flex: 1 1 100%;
+  order: 3; /* 1段目(タイトル・時計・カレンダー)の下の2段目に置く */
   min-width: 0;
   gap: 6px;
   padding-bottom: 4px;
@@ -120,6 +121,7 @@ main {
 
 #calendar-toggle {
   flex-shrink: 0;
+  margin-left: auto;
   padding: 4px 12px;
   border: 0;
   border-radius: 999px;
@@ -190,10 +192,10 @@ main {
   opacity: 1;
 }
 
-/* 狭い画面ではヘッダーの2行目に回す */
+/* 狭い画面では時計をさらに下の段に回す */
 @media (max-width: 600px) {
   #sessions {
-    order: 5;
+    order: 5; /* 狭い画面では通貨ペアの下(3段目)に回す */
     flex-basis: 100%;
   }
 }
