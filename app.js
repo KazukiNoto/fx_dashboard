@@ -145,62 +145,6 @@ navEl.addEventListener(
   { passive: false }
 );
 
-// 経済指標カレンダー(TradingView Economic Calendar ウィジェット)。開いている間だけ読み込む
-const CALENDAR_KEY = "fx-dashboard:calendar";
-const calendarEl = document.getElementById("calendar");
-const calendarToggle = document.getElementById("calendar-toggle");
-let calendarTheme = null; // 現在マウントしているウィジェットのテーマ
-
-function calendarOpen() {
-  try {
-    return localStorage.getItem(CALENDAR_KEY) === "1";
-  } catch {
-    return false;
-  }
-}
-
-function renderCalendar() {
-  const open = calendarOpen();
-  calendarToggle.setAttribute("aria-pressed", String(open));
-  calendarEl.hidden = !open;
-  if (!open) {
-    calendarEl.replaceChildren();
-    calendarTheme = null;
-    return;
-  }
-  const theme = darkQuery.matches ? "dark" : "light";
-  if (calendarTheme === theme) return; // ペア切替では再読み込みしない
-  calendarTheme = theme;
-
-  const container = document.createElement("div");
-  container.className = "tradingview-widget-container";
-  const widget = document.createElement("div");
-  widget.className = "tradingview-widget-container__widget";
-  container.append(widget);
-  const script = document.createElement("script");
-  script.src =
-    "https://s3.tradingview.com/external-embedding/embed-widget-events.js";
-  script.async = true;
-  script.textContent = JSON.stringify({
-    colorTheme: theme,
-    isTransparent: true,
-    width: "100%",
-    height: "100%",
-    locale: "ja",
-    importanceFilter: "-1,0,1",
-    countryFilter: "us,eu,gb,au,jp",
-  });
-  container.append(script);
-  calendarEl.replaceChildren(container);
-}
-
-calendarToggle.addEventListener("click", () => {
-  try {
-    localStorage.setItem(CALENDAR_KEY, calendarOpen() ? "0" : "1");
-  } catch {}
-  renderCalendar();
-});
-
 function update() {
   const pair = currentPair();
   document.title = `${pair.label} | FX Dashboard`;
@@ -212,7 +156,6 @@ function update() {
     .querySelector('[aria-pressed="true"]')
     ?.scrollIntoView({ block: "nearest", inline: "nearest" });
   renderChart(pair);
-  renderCalendar();
 }
 
 // 数字キー 1〜4 で通貨ペアを切り替え
