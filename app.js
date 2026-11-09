@@ -50,6 +50,7 @@ function mountWidget(parent, pair, interval) {
     locale: "ja",
     allow_symbol_change: false,
     hide_side_toolbar: true,
+    hide_top_toolbar: true,
     hide_volume: true,
     studies: ["STD;MACD"],
     support_host: "https://www.tradingview.com",
