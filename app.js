@@ -226,6 +226,64 @@ window.addEventListener("hashchange", update);
 darkQuery.addEventListener("change", update);
 update();
 
+// 相場時間の時計(日本時間の現在時刻と、東京・ロンドン・NY セッションの開閉)
+// 各市場の現地時刻の平日 start〜end 時を「開いている」とみなす近似。現地時刻で判定するので夏時間にも追従する
+const SESSIONS = [
+  { label: "東京", tz: "Asia/Tokyo", start: 9, end: 18 },
+  { label: "ロンドン", tz: "Europe/London", start: 8, end: 17 },
+  { label: "NY", tz: "America/New_York", start: 8, end: 17 },
+];
+
+const sessionsEl = document.getElementById("sessions");
+const clockEl = document.getElementById("clock");
+const clockFormat = new Intl.DateTimeFormat("ja-JP", {
+  timeZone: "Asia/Tokyo",
+  hour: "2-digit",
+  minute: "2-digit",
+  second: "2-digit",
+  hourCycle: "h23",
+});
+const sessionBadges = SESSIONS.map((session) => {
+  const badge = document.createElement("span");
+  badge.className = "session";
+  badge.textContent = session.label;
+  badge.title = `${session.label} ${session.start}:00〜${session.end}:00(現地時間・平日)`;
+  sessionsEl.append(badge);
+  const format = new Intl.DateTimeFormat("en-US", {
+    timeZone: session.tz,
+    weekday: "short",
+    hour: "numeric",
+    hourCycle: "h23",
+  });
+  return { session, badge, format };
+});
+
+function isSessionOpen({ session, format }, now) {
+  const parts = Object.fromEntries(
+    format.formatToParts(now).map((p) => [p.type, p.value])
+  );
+  const weekday = parts.weekday !== "Sat" && parts.weekday !== "Sun";
+  const hour = Number(parts.hour);
+  return weekday && hour >= session.start && hour < session.end;
+}
+
+function tickClock() {
+  const now = new Date();
+  clockEl.textContent = clockFormat.format(now);
+  clockEl.dateTime = now.toISOString();
+  for (const item of sessionBadges) {
+    const open = isSessionOpen(item, now);
+    item.badge.dataset.open = String(open);
+    item.badge.setAttribute(
+      "aria-label",
+      `${item.session.label} ${open ? "オープン中" : "クローズ"}`
+    );
+  }
+}
+
+tickClock();
+setInterval(tickClock, 1000);
+
 // PWA: Service Worker を登録(インストール可能にする)
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("sw.js").catch(() => {});

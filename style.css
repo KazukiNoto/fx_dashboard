@@ -3,6 +3,7 @@
   --fg: #1a1a1a;
   --muted: #e8e8ec;
   --accent: #2962ff;
+  --open: #26a69a;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -159,5 +160,40 @@ main {
     height: 55vh;
     border-top: 1px solid var(--muted);
     background: var(--bg);
+  }
+}
+
+/* 相場時間の時計とセッション表示 */
+#sessions {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+}
+
+#clock {
+  margin-right: 4px;
+  font-variant-numeric: tabular-nums;
+}
+
+.session {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--muted);
+  opacity: 0.6;
+}
+
+.session[data-open="true"] {
+  background: var(--open);
+  color: #fff;
+  opacity: 1;
+}
+
+/* 狭い画面ではヘッダーの2行目に回す */
+@media (max-width: 600px) {
+  #sessions {
+    order: 5;
+    flex-basis: 100%;
   }
 }
