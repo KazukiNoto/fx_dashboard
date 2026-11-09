@@ -129,8 +129,13 @@ main {
   font-size: 0.85rem;
 }
 
+#session-phase {
+  margin-right: 8px;
+  font-weight: 600;
+}
+
 #clock {
-  margin-right: 4px;
+  margin-left: 6px;
   font-variant-numeric: tabular-nums;
 }
 
@@ -153,5 +158,10 @@ main {
     order: 5; /* 狭い画面では通貨ペアの下(3段目)に回す */
     flex-basis: 100%;
     justify-content: flex-end;
+  }
+
+  /* バッジは隠す(時間帯は文言で分かる) */
+  .session {
+    display: none;
   }
 }

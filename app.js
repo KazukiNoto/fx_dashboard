@@ -179,11 +179,11 @@ const SESSIONS = [
 
 const sessionsEl = document.getElementById("sessions");
 const clockEl = document.getElementById("clock");
+const phaseEl = document.getElementById("session-phase");
 const clockFormat = new Intl.DateTimeFormat("ja-JP", {
   timeZone: "Asia/Tokyo",
   hour: "2-digit",
   minute: "2-digit",
-  second: "2-digit",
   hourCycle: "h23",
 });
 const sessionBadges = SESSIONS.map((session) => {
@@ -201,6 +201,8 @@ const sessionBadges = SESSIONS.map((session) => {
   return { session, badge, format };
 });
 
+sessionsEl.append(clockEl); // 並び順: 時間帯の文言 → バッジ → 時計(一番右)
+
 function isSessionOpen({ session, format }, now) {
   const parts = Object.fromEntries(
     format.formatToParts(now).map((p) => [p.type, p.value])
@@ -210,10 +212,52 @@ function isSessionOpen({ session, format }, now) {
   return weekday && hour >= session.start && hour < session.end;
 }
 
+// いま開いているセッションから「今の時間帯」の文言を作る
+const PHASE_NAMES = {
+  東京: "東京時間",
+  ロンドン: "ロンドン時間",
+  NY: "NY時間",
+};
+
+// 次にどれかのセッションが開く時刻(15分刻みで探す。開場は毎時0分なので正確)
+function nextOpening(now) {
+  const STEP = 15 * 60 * 1000;
+  const first = Math.ceil(now.getTime() / STEP) * STEP;
+  for (let i = 0; i < 7 * 24 * 4; i++) {
+    const at = new Date(first + i * STEP);
+    const opened = sessionBadges
+      .filter((item) => isSessionOpen(item, at))
+      .map((item) => item.session.label);
+    if (opened.length > 0) return { at, names: opened };
+  }
+  return null;
+}
+
+function formatRemaining(ms) {
+  const minutes = Math.max(0, Math.round(ms / 60000));
+  const h = Math.floor(minutes / 60);
+  const m = String(minutes % 60).padStart(2, "0");
+  return `${h}:${m}`;
+}
+
+let phaseMinute = null;
+let phaseText = "";
+
+function phaseLabel(now, openNames) {
+  if (openNames.length === 1) return PHASE_NAMES[openNames[0]];
+  if (openNames.length > 1) return `${openNames.join("・")} 重複`;
+  const next = nextOpening(now);
+  if (!next) return "クローズ";
+  const ms = next.at - now;
+  if (ms >= 24 * 60 * 60 * 1000) return "週末(クローズ)";
+  return `閑散時間帯(${next.names[0]}オープンまで ${formatRemaining(ms)})`;
+}
+
 function tickClock() {
   const now = new Date();
   clockEl.textContent = clockFormat.format(now);
   clockEl.dateTime = now.toISOString();
+  const openNames = [];
   for (const item of sessionBadges) {
     const open = isSessionOpen(item, now);
     item.badge.dataset.open = String(open);
@@ -221,6 +265,14 @@ function tickClock() {
       "aria-label",
       `${item.session.label} ${open ? "オープン中" : "クローズ"}`
     );
+    if (open) openNames.push(item.session.label);
+  }
+  // 文言は分が変わったときだけ作り直す(次の開場の探索を毎秒しないため)
+  const minute = Math.floor(now.getTime() / 60000);
+  if (minute !== phaseMinute) {
+    phaseMinute = minute;
+    phaseText = phaseLabel(now, openNames);
+    phaseEl.textContent = phaseText;
   }
 }
 
