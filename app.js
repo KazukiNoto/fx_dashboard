@@ -39,8 +39,24 @@ const INTERVALS = [
   { value: "D", label: "日足" },
 ];
 
-// 上下ペインの時間足(上: 5分足 / 下: 30分足)。ページを開いている間だけ保持する
-const paneIntervals = ["5", "30"];
+// 上下ペインの時間足(初期値: 上 5分足 / 下 30分足)。localStorage に保存してリロード後も保持する
+const INTERVALS_KEY = "fx-dashboard:intervals";
+
+function loadIntervals() {
+  const fallback = ["5", "30"];
+  try {
+    const saved = JSON.parse(localStorage.getItem(INTERVALS_KEY));
+    const valid =
+      Array.isArray(saved) &&
+      saved.length === 2 &&
+      saved.every((v) => INTERVALS.some((i) => i.value === v));
+    return valid ? saved : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+const paneIntervals = loadIntervals();
 
 function createPane(pair, index) {
   const interval = paneIntervals[index];
@@ -80,6 +96,9 @@ function createPane(pair, index) {
   }
   select.addEventListener("change", () => {
     paneIntervals[index] = select.value;
+    try {
+      localStorage.setItem(INTERVALS_KEY, JSON.stringify(paneIntervals));
+    } catch {}
     container.replaceWith(createPane(pair, index));
   });
   container.append(select);
