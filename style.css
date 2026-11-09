@@ -104,7 +104,7 @@ main {
 
 /* 画面が低い・狭い場合も各チャートが潰れないようにし、main をスクロールさせる */
 #chart {
-  grid-template-rows: minmax(320px, 1fr) minmax(320px, 1fr);
+  grid-template-rows: minmax(260px, 1fr) minmax(260px, 1fr);
 }
 
 /* 各ペインの時間足ラベル(チャート左上に重ねる) */
@@ -202,5 +202,56 @@ main {
 @media (max-width: 600px) {
   #wake-toggle {
     margin-left: auto; /* 時計が3段目に回るので、1段目の右端に置く */
+  }
+}
+
+/* 縦が短く横が広い画面(横向きのスマホ、縦が短い折りたたみ端末など):
+   ヘッダーを1行に縮め、チャートは上下ではなく左右に並べて、スクロールなしで2枚とも見えるようにする */
+@media (max-height: 520px) and (min-width: 480px) {
+  header {
+    flex-wrap: nowrap;
+    gap: 12px;
+    padding: 4px 12px;
+  }
+
+  /* タイトルは視覚的に隠す(スクリーンリーダー用には残す) */
+  h1 {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  #pairs {
+    order: 0;
+    flex: 1 1 0;
+    padding-bottom: 0;
+  }
+
+  #sessions {
+    order: 0;
+    flex-basis: auto;
+  }
+
+  .session {
+    display: none;
+  }
+
+  #wake-toggle {
+    margin-left: 0;
+  }
+
+  #chart {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: minmax(0, 1fr);
+  }
+}
+
+/* 短くて幅も狭い画面では、時間帯の文言を隠して通貨ペアのボタンに幅を譲る */
+@media (max-height: 520px) and (min-width: 480px) and (max-width: 639px) {
+  #session-phase {
+    display: none;
   }
 }
