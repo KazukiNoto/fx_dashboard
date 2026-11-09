@@ -70,6 +70,8 @@ h1 {
 }
 
 main {
+  display: flex;
+  gap: 4px;
   flex: 1;
   min-height: 0;
   overflow-y: auto;
@@ -83,6 +85,8 @@ main {
 }
 
 #chart {
+  flex: 1;
+  min-width: 0;
   display: grid;
   grid-template-rows: 1fr 1fr;
   gap: 4px;
@@ -111,4 +115,49 @@ main {
   font: inherit;
   font-size: 0.8rem;
   cursor: pointer;
+}
+
+#calendar-toggle {
+  flex-shrink: 0;
+  padding: 4px 12px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--muted);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+#calendar-toggle[aria-pressed="true"] {
+  background: var(--accent);
+  color: #fff;
+}
+
+/* 経済指標カレンダーのパネル: 広い画面では右側、狭い画面では下から出るシート */
+#calendar {
+  flex: 0 0 340px;
+  min-height: 0;
+}
+
+#calendar[hidden] {
+  display: none;
+}
+
+#calendar .tradingview-widget-container,
+#calendar .tradingview-widget-container__widget {
+  height: 100%;
+  width: 100%;
+}
+
+@media (max-width: 800px) {
+  #calendar {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 10;
+    height: 55vh;
+    border-top: 1px solid var(--muted);
+    background: var(--bg);
+  }
 }
