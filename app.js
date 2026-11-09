@@ -42,11 +42,11 @@ const INTERVALS = [
   { value: "D", label: "日足" },
 ];
 
-// 上下ペインの時間足(初期値: 上 5分足 / 下 30分足)。localStorage に保存してリロード後も保持する
+// 上下ペインの時間足(初期値: 上 1分足 / 下 30分足)。localStorage に保存してリロード後も保持する
 const INTERVALS_KEY = "fx-dashboard:intervals";
 
 function loadIntervals() {
-  const fallback = ["5", "30"];
+  const fallback = ["1", "30"];
   try {
     const saved = JSON.parse(localStorage.getItem(INTERVALS_KEY));
     const valid =
