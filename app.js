@@ -30,7 +30,7 @@ function currentPair() {
 }
 
 // MACD のパラメーター(短期・長期・シグナル)。TradingView の入力名は in_1=短期 / in_2=長期 / in_3=シグナル
-const MACD = { fast: 12, slow: 26, signal: 9 };
+const MACD = { fast: 8, slow: 21, signal: 5 };
 
 const INTERVALS = [
   { value: "1", label: "1分足" },
