@@ -29,6 +29,9 @@ function currentPair() {
   );
 }
 
+// MACD のパラメーター(短期・長期・シグナル)。TradingView の入力名は in_1=短期 / in_2=長期 / in_3=シグナル
+const MACD = { fast: 12, slow: 26, signal: 9 };
+
 const INTERVALS = [
   { value: "1", label: "1分足" },
   { value: "5", label: "5分足" },
@@ -83,7 +86,12 @@ function createPane(pair, index) {
     hide_top_toolbar: true,
     hide_legend: true,
     hide_volume: true,
-    studies: ["STD;MACD"],
+    studies: [
+      {
+        id: "STD;MACD",
+        inputs: { in_1: MACD.fast, in_2: MACD.slow, in_3: MACD.signal },
+      },
+    ],
     support_host: "https://www.tradingview.com",
   });
   container.append(script);
