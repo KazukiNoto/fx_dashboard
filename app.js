@@ -29,7 +29,21 @@ function currentPair() {
   );
 }
 
-function mountWidget(parent, pair, interval, label) {
+const INTERVALS = [
+  { value: "1", label: "1分足" },
+  { value: "5", label: "5分足" },
+  { value: "15", label: "15分足" },
+  { value: "30", label: "30分足" },
+  { value: "60", label: "1時間足" },
+  { value: "240", label: "4時間足" },
+  { value: "D", label: "日足" },
+];
+
+// 上下ペインの時間足(上: 5分足 / 下: 30分足)。ページを開いている間だけ保持する
+const paneIntervals = ["5", "30"];
+
+function createPane(pair, index) {
+  const interval = paneIntervals[index];
   const container = document.createElement("div");
   container.className = "tradingview-widget-container";
   const widget = document.createElement("div");
@@ -58,18 +72,23 @@ function mountWidget(parent, pair, interval, label) {
   });
   container.append(script);
 
-  const badge = document.createElement("span");
-  badge.className = "interval-label";
-  badge.textContent = label;
-  container.append(badge);
-  parent.append(container);
+  const select = document.createElement("select");
+  select.className = "interval-select";
+  select.setAttribute("aria-label", "時間足");
+  for (const { value, label } of INTERVALS) {
+    select.add(new Option(label, value, false, value === interval));
+  }
+  select.addEventListener("change", () => {
+    paneIntervals[index] = select.value;
+    container.replaceWith(createPane(pair, index));
+  });
+  container.append(select);
+  return container;
 }
 
-// 指定ペアを上下2ペインで表示(上: 5分足 / 下: 30分足)
+// 指定ペアを上下2ペインで表示
 function renderChart(pair) {
-  chartEl.replaceChildren();
-  mountWidget(chartEl, pair, "5", "5分足");
-  mountWidget(chartEl, pair, "30", "30分足");
+  chartEl.replaceChildren(createPane(pair, 0), createPane(pair, 1));
 }
 
 function renderNav(active) {
