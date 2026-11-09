@@ -65,10 +65,18 @@ h1 {
 main {
   flex: 1;
   min-height: 0;
+  overflow-y: auto;
 }
 
 #chart,
+#chart .tradingview-widget-container,
 #chart .tradingview-widget-container__widget {
   height: 100%;
   width: 100%;
+}
+
+#chart {
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  gap: 4px;
 }

@@ -1,11 +1,8 @@
 const PAIRS = [
-  { label: "USD/JPY", symbol: "FX_IDC:USDJPY" },
-  { label: "EUR/JPY", symbol: "FX_IDC:EURJPY" },
-  { label: "GBP/JPY", symbol: "FX_IDC:GBPJPY" },
-  { label: "AUD/JPY", symbol: "FX_IDC:AUDJPY" },
-  { label: "EUR/USD", symbol: "FX_IDC:EURUSD" },
-  { label: "GBP/USD", symbol: "FX_IDC:GBPUSD" },
-  { label: "AUD/USD", symbol: "FX_IDC:AUDUSD" },
+  { label: "USD/JPY", flag: "🇺🇸", symbol: "FX_IDC:USDJPY" },
+  { label: "EUR/JPY", flag: "🇪🇺", symbol: "FX_IDC:EURJPY" },
+  { label: "GBP/JPY", flag: "🇬🇧", symbol: "FX_IDC:GBPJPY" },
+  { label: "AUD/JPY", flag: "🇦🇺", symbol: "FX_IDC:AUDJPY" },
 ];
 
 const chartEl = document.getElementById("chart");
@@ -17,12 +14,12 @@ function currentPair() {
   return PAIRS.find((p) => p.label === label) ?? PAIRS[0];
 }
 
-function renderChart(pair) {
-  chartEl.replaceChildren();
-
+function mountWidget(parent, pair, interval) {
+  const container = document.createElement("div");
+  container.className = "tradingview-widget-container";
   const widget = document.createElement("div");
   widget.className = "tradingview-widget-container__widget";
-  chartEl.append(widget);
+  container.append(widget);
 
   const script = document.createElement("script");
   script.src =
@@ -31,15 +28,26 @@ function renderChart(pair) {
   script.textContent = JSON.stringify({
     autosize: true,
     symbol: pair.symbol,
-    interval: "60",
+    interval,
     timezone: "Asia/Tokyo",
     theme: darkQuery.matches ? "dark" : "light",
     style: "1",
     locale: "ja",
-    allow_symbol_change: true,
+    allow_symbol_change: false,
+    hide_side_toolbar: true,
+    hide_volume: true,
+    studies: ["STD;MACD"],
     support_host: "https://www.tradingview.com",
   });
-  chartEl.append(script);
+  container.append(script);
+  parent.append(container);
+}
+
+// 指定ペアを上下2ペインで表示(上: 5分足 / 下: 30分足)
+function renderChart(pair) {
+  chartEl.replaceChildren();
+  mountWidget(chartEl, pair, "5");
+  mountWidget(chartEl, pair, "30");
 }
 
 function renderNav(active) {
@@ -47,7 +55,7 @@ function renderNav(active) {
     ...PAIRS.map((pair) => {
       const button = document.createElement("button");
       button.type = "button";
-      button.textContent = pair.label;
+      button.textContent = `${pair.flag} ${pair.label}`;
       button.setAttribute("aria-pressed", String(pair === active));
       button.addEventListener("click", () => {
         location.hash = encodeURIComponent(pair.label);
