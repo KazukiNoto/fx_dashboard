@@ -118,11 +118,8 @@ function renderChart(pair) {
   chartEl.replaceChildren(createPane(pair, 0), createPane(pair, 1));
 }
 
-// 通貨ペアの下に並べる小さなチャート(米金利・原油)。ペアを切り替えても表示したままにする
+// 通貨ペアの下に並べる小さなチャート(原油)。米国債の利回り・先物は、TradingView の埋め込みでは使えないため載せていない。ペアを切り替えても表示したままにする
 const MARKETS = [
-  // 米国債の利回り(TVC:US10Y など)は埋め込みでは使えないため、債券先物の価格で代用する(価格と利回りは逆に動く)
-  { label: "米10年債先物(価格)", symbol: "CBOT:ZN1!" },
-  { label: "米2年債先物(価格)", symbol: "CBOT:ZT1!" },
   { label: "WTI原油", symbol: "TVC:USOIL" },
 ];
 
