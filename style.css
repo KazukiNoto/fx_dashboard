@@ -112,7 +112,7 @@ main {
   grid-auto-flow: column; /* 個数が変わっても1行に並べる */
   grid-auto-columns: minmax(0, 1fr);
   gap: 4px;
-  height: 180px;
+  height: clamp(110px, 22vh, 200px); /* 画面の高さに合わせて縮める */
 }
 
 #markets .market,
@@ -121,9 +121,11 @@ main {
   width: 100%;
 }
 
-/* 画面が低い・狭い場合も各チャートが潰れないようにし、main をスクロールさせる */
+/* 上下2枚のチャートは残りの高さを等分し、下の米金利などと合わせて一画面に収める。
+   極端に低い画面だけ、潰れないよう最低の高さを守って main をスクロールさせる */
 #chart {
-  grid-template-rows: minmax(260px, 1fr) minmax(260px, 1fr);
+  grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+  min-height: 360px;
 }
 
 /* 各ペインの時間足ラベル(チャート左上に重ねる) */
