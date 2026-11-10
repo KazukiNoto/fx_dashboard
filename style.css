@@ -83,6 +83,7 @@ h1 {
 
 main {
   display: flex;
+  flex-direction: column;
   gap: 4px;
   flex: 1;
   min-height: 0;
@@ -102,6 +103,22 @@ main {
   display: grid;
   grid-template-rows: 1fr 1fr;
   gap: 4px;
+}
+
+/* 通貨ペアのチャートの下に並べる、米金利・原油の小さなチャート */
+#markets {
+  display: grid;
+  flex: none;
+  grid-auto-flow: column; /* 個数が変わっても1行に並べる */
+  grid-auto-columns: minmax(0, 1fr);
+  gap: 4px;
+  height: 120px;
+}
+
+#markets .market,
+#markets .tradingview-widget-container__widget {
+  height: 100%;
+  width: 100%;
 }
 
 /* 画面が低い・狭い場合も各チャートが潰れないようにし、main をスクロールさせる */
@@ -328,7 +345,10 @@ main {
     margin-left: 0;
   }
 
+  /* チャートは見えている範囲いっぱいに。米金利・原油はスクロールで下に出す */
   #chart {
+    flex: none;
+    height: 100%;
     grid-template-columns: 1fr 1fr;
     grid-template-rows: minmax(0, 1fr);
   }

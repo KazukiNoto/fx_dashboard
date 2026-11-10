@@ -118,6 +118,46 @@ function renderChart(pair) {
   chartEl.replaceChildren(createPane(pair, 0), createPane(pair, 1));
 }
 
+// 通貨ペアの下に並べる小さなチャート(米金利・原油)。ペアを切り替えても表示したままにする
+const MARKETS = [
+  { label: "米10年債利回り", symbol: "TVC:US10Y" },
+  { label: "米2年債利回り", symbol: "TVC:US02Y" },
+  { label: "WTI原油", symbol: "TVC:USOIL" },
+];
+
+const marketsEl = document.getElementById("markets");
+
+function renderMarkets() {
+  marketsEl.replaceChildren(
+    ...MARKETS.map(({ label, symbol }) => {
+      const container = document.createElement("div");
+      container.className = "tradingview-widget-container market";
+      container.setAttribute("aria-label", label);
+      const widget = document.createElement("div");
+      widget.className = "tradingview-widget-container__widget";
+      container.append(widget);
+
+      const script = document.createElement("script");
+      script.src =
+        "https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js";
+      script.async = true;
+      script.textContent = JSON.stringify({
+        symbol,
+        width: "100%",
+        height: "100%",
+        locale: "ja",
+        dateRange: "1D",
+        colorTheme: darkQuery.matches ? "dark" : "light",
+        isTransparent: true,
+        autosize: true,
+        largeChartUrl: "",
+      });
+      container.append(script);
+      return container;
+    })
+  );
+}
+
 function renderNav(active) {
   navEl.replaceChildren(
     ...PAIRS.map((pair) => {
@@ -171,7 +211,9 @@ window.addEventListener("keydown", (e) => {
 
 window.addEventListener("hashchange", update);
 darkQuery.addEventListener("change", update);
+darkQuery.addEventListener("change", renderMarkets);
 update();
+renderMarkets();
 
 // 相場時間の時計(日本時間の現在時刻と、東京・ロンドン・NY セッションの開閉)
 // 各市場の現地時刻の平日 start〜end 時を「開いている」とみなす近似。現地時刻で判定するので夏時間にも追従する
