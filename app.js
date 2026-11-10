@@ -120,8 +120,9 @@ function renderChart(pair) {
 
 // 通貨ペアの下に並べる小さなチャート(米金利・原油)。ペアを切り替えても表示したままにする
 const MARKETS = [
-  { label: "米10年債利回り", symbol: "TVC:US10Y" },
-  { label: "米2年債利回り", symbol: "TVC:US02Y" },
+  // 米国債の利回り(TVC:US10Y など)は埋め込みでは使えないため、債券先物の価格で代用する(価格と利回りは逆に動く)
+  { label: "米10年債先物(価格)", symbol: "CBOT:ZN1!" },
+  { label: "米2年債先物(価格)", symbol: "CBOT:ZT1!" },
   { label: "WTI原油", symbol: "TVC:USOIL" },
 ];
 
@@ -133,6 +134,7 @@ function renderMarkets() {
       const container = document.createElement("div");
       container.className = "tradingview-widget-container market";
       container.setAttribute("aria-label", label);
+      container.title = label;
       const widget = document.createElement("div");
       widget.className = "tradingview-widget-container__widget";
       container.append(widget);
