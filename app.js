@@ -247,9 +247,21 @@ function formatRemaining(ms) {
 let phaseMinute = null;
 let phaseText = "";
 
+// ロンドンがオープン中のときは、ロンドンの現地時刻(夏時間にも追従)を文言に添える
+const londonSession = SESSIONS.find((s) => s.label === "ロンドン");
+const londonFormat = new Intl.DateTimeFormat("ja-JP", {
+  timeZone: londonSession.tz,
+  hour: "2-digit",
+  minute: "2-digit",
+  hourCycle: "h23",
+});
+
 function phaseLabel(now, openNames) {
-  if (openNames.length === 1) return PHASE_NAMES[openNames[0]];
-  if (openNames.length > 1) return `${openNames.join("・")} 重複`;
+  const londonTime = openNames.includes("ロンドン")
+    ? `(現地 ${londonFormat.format(now)})`
+    : "";
+  if (openNames.length === 1) return PHASE_NAMES[openNames[0]] + londonTime;
+  if (openNames.length > 1) return `${openNames.join("・")} 重複${londonTime}`;
   const next = nextOpening(now);
   if (!next) return "クローズ";
   const ms = next.at - now;
