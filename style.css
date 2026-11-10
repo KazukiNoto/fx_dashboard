@@ -144,6 +144,26 @@ main {
   font-weight: 600;
 }
 
+/* オープン中のセッション(国旗 + 現地時刻)。重複時は横に並べる */
+.phase-item {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 10px;
+  font-variant-numeric: tabular-nums;
+}
+
+.phase-item:last-child {
+  margin-right: 0;
+}
+
+.phase-item .flag {
+  width: 1.25em;
+  height: 0.94em;
+  margin-right: 0.4em;
+  border-radius: 2px;
+  outline: 1px solid rgba(128, 128, 128, 0.35); /* 白地の日本の国旗が背景に溶けないように */
+}
+
 #clock {
   margin-left: 6px;
   font-variant-numeric: tabular-nums;

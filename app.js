@@ -176,9 +176,9 @@ update();
 // 相場時間の時計(日本時間の現在時刻と、東京・ロンドン・NY セッションの開閉)
 // 各市場の現地時刻の平日 start〜end 時を「開いている」とみなす近似。現地時刻で判定するので夏時間にも追従する
 const SESSIONS = [
-  { label: "東京", tz: "Asia/Tokyo", start: 9, end: 18 },
-  { label: "ロンドン", tz: "Europe/London", start: 8, end: 17 },
-  { label: "NY", tz: "America/New_York", start: 8, end: 17 },
+  { label: "東京", flag: "jp", tz: "Asia/Tokyo", start: 9, end: 18 },
+  { label: "ロンドン", flag: "gb", tz: "Europe/London", start: 8, end: 17 },
+  { label: "NY", flag: "us", tz: "America/New_York", start: 8, end: 17 },
 ];
 
 const sessionsEl = document.getElementById("sessions");
@@ -245,7 +245,6 @@ function formatRemaining(ms) {
 }
 
 let phaseMinute = null;
-let phaseText = "";
 
 // オープン中のセッションの現地時刻(夏時間にも追従)を文言に添える
 const localFormats = Object.fromEntries(
@@ -260,21 +259,36 @@ const localFormats = Object.fromEntries(
   ])
 );
 
-function phaseLabel(now, openNames) {
-  const localTimes = openNames.map(
-    (name) => `${name} ${localFormats[name].format(now)}`
-  );
-  if (openNames.length === 1) {
-    return `${PHASE_NAMES[openNames[0]]}(現地 ${localFormats[openNames[0]].format(now)})`;
-  }
-  if (openNames.length > 1) {
-    return `${openNames.join("・")} 重複(${localTimes.join(" / ")})`;
-  }
+// 閉場中の文言
+function closedLabel(now) {
   const next = nextOpening(now);
   if (!next) return "クローズ";
   const ms = next.at - now;
   if (ms >= 24 * 60 * 60 * 1000) return "週末(クローズ)";
   return `閑散時間帯(${next.names[0]}オープンまで ${formatRemaining(ms)})`;
+}
+
+// オープン中のセッションは「国旗 + 現地時刻」で表す(重複時は並べる)。閉場中は文言
+function renderPhase(now, openNames) {
+  if (openNames.length === 0) {
+    phaseEl.textContent = closedLabel(now);
+    return;
+  }
+  phaseEl.replaceChildren(
+    ...openNames.map((name) => {
+      const session = SESSIONS.find((s) => s.label === name);
+      const time = localFormats[name].format(now);
+      const item = document.createElement("span");
+      item.className = "phase-item";
+      item.title = `${PHASE_NAMES[name]}(現地 ${time})`;
+      const flag = document.createElement("img");
+      flag.src = `flags/${session.flag}.svg`;
+      flag.alt = name;
+      flag.className = "flag";
+      item.append(flag, time);
+      return item;
+    })
+  );
 }
 
 function tickClock() {
@@ -295,8 +309,7 @@ function tickClock() {
   const minute = Math.floor(now.getTime() / 60000);
   if (minute !== phaseMinute) {
     phaseMinute = minute;
-    phaseText = phaseLabel(now, openNames);
-    phaseEl.textContent = phaseText;
+    renderPhase(now, openNames);
   }
 }
 

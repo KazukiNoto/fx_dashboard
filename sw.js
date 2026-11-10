@@ -1,6 +1,6 @@
 // アプリの骨組み(HTML/CSS/JS/アイコン)だけをキャッシュする Service Worker。
 // チャートとカレンダーは TradingView から読み込むため、オフラインでは表示されない。
-const CACHE = "fx-dashboard-v2";
+const CACHE = "fx-dashboard-v3";
 const SHELL = [
   "./",
   "index.html",
@@ -13,6 +13,7 @@ const SHELL = [
   "flags/eu.svg",
   "flags/gb.svg",
   "flags/au.svg",
+  "flags/jp.svg",
 ];
 
 self.addEventListener("install", (event) => {
