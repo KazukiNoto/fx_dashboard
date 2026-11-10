@@ -30,6 +30,8 @@ body {
 }
 
 header {
+  position: relative;
+  z-index: 20; /* メニューをチャートの上に重ねる */
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -174,10 +176,14 @@ main {
   }
 }
 
-/* 画面スリープ防止のボタン(Material Symbols の visibility アイコン) */
-#wake-toggle {
-  display: inline-flex;
+/* 右上のメニュー(バーガーボタン)。中に画面スリープ防止とアプリ更新を入れる */
+#menu-wrap {
+  position: relative;
   flex-shrink: 0;
+}
+
+#menu-toggle {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 32px;
@@ -190,17 +196,76 @@ main {
   cursor: pointer;
 }
 
-#wake-toggle[hidden] {
+#menu-toggle[aria-expanded="true"] {
+  background: var(--accent);
+  color: #fff;
+}
+
+#menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 240px;
+  padding: 4px;
+  border: 1px solid var(--muted);
+  border-radius: 10px;
+  background: var(--bg);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+#menu[hidden],
+#menu button[hidden] {
   display: none;
 }
 
-#wake-toggle[aria-pressed="true"] {
+#menu button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+#menu button:hover,
+#menu button:focus-visible {
+  background: var(--muted);
+}
+
+#menu button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+#menu svg {
+  flex-shrink: 0;
+}
+
+.menu-label {
+  flex: 1;
+  white-space: nowrap;
+}
+
+.menu-state {
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--muted);
+  font-size: 0.8rem;
+}
+
+#wake-toggle[aria-pressed="true"] .menu-state {
   background: var(--accent);
   color: #fff;
 }
 
 @media (max-width: 600px) {
-  #wake-toggle {
+  #menu-wrap {
     margin-left: auto; /* 時計が3段目に回るので、1段目の右端に置く */
   }
 }
@@ -239,7 +304,7 @@ main {
     display: none;
   }
 
-  #wake-toggle {
+  #menu-wrap {
     margin-left: 0;
   }
 

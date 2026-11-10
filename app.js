@@ -306,6 +306,7 @@ setInterval(tickClock, 1000);
 // 画面スリープの防止(Screen Wake Lock API)。非対応のブラウザではボタンを出さない
 const WAKE_KEY = "fx-dashboard:wake";
 const wakeToggle = document.getElementById("wake-toggle");
+const wakeState = document.getElementById("wake-state");
 let wakeLock = null;
 
 function wakeWanted() {
@@ -325,7 +326,7 @@ function setWakeWanted(on) {
 function renderWake() {
   const on = wakeWanted();
   wakeToggle.setAttribute("aria-pressed", String(on));
-  wakeToggle.title = `画面を消さない(${on ? "オン" : "オフ"})`;
+  wakeState.textContent = on ? "オン" : "オフ";
 }
 
 async function acquireWake() {
@@ -357,6 +358,40 @@ if ("wakeLock" in navigator) {
   renderWake();
   acquireWake();
 }
+
+// 右上のメニュー(バーガーボタン): 開閉と、アプリ更新(Service Worker とキャッシュを消して読み込み直す)
+const menuToggle = document.getElementById("menu-toggle");
+const menuEl = document.getElementById("menu");
+const menuWrap = document.getElementById("menu-wrap");
+const refreshButton = document.getElementById("refresh-app");
+
+function setMenuOpen(open) {
+  menuEl.hidden = !open;
+  menuToggle.setAttribute("aria-expanded", String(open));
+}
+
+menuToggle.addEventListener("click", () => setMenuOpen(menuEl.hidden));
+document.addEventListener("click", (e) => {
+  if (!menuWrap.contains(e.target)) setMenuOpen(false);
+});
+window.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && !menuEl.hidden) {
+    setMenuOpen(false);
+    menuToggle.focus();
+  }
+});
+
+refreshButton.addEventListener("click", async () => {
+  refreshButton.disabled = true;
+  refreshButton.querySelector(".menu-label").textContent = "更新中…";
+  try {
+    const regs = (await navigator.serviceWorker?.getRegistrations()) ?? [];
+    await Promise.all(regs.map((r) => r.unregister()));
+    const keys = (await window.caches?.keys()) ?? [];
+    await Promise.all(keys.map((k) => caches.delete(k)));
+  } catch {}
+  location.reload();
+});
 
 // PWA: Service Worker を登録(インストール可能にする)
 if ("serviceWorker" in navigator) {
