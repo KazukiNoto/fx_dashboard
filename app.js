@@ -118,9 +118,9 @@ function renderChart(pair) {
   chartEl.replaceChildren(createPane(pair, 0), createPane(pair, 1));
 }
 
-// 通貨ペアの下に並べる小さなチャート(ドル指数・ゴールド・原油)。米国債の利回り・先物は、TradingView の埋め込みでは使えないため載せていない。ペアを切り替えても表示したままにする
+// 通貨ペアの下に並べる小さなチャート(S&P500・ゴールド・原油)。米国債の利回り・先物は、TradingView の埋め込みでは使えないため載せていない。ペアを切り替えても表示したままにする
 const MARKETS = [
-  { label: "ドル指数", symbol: "TVC:DXY" },
+  { label: "S&P500", symbol: "FOREXCOM:SPXUSD" },
   { label: "ゴールド", symbol: "TVC:GOLD" },
   { label: "WTI原油", symbol: "TVC:USOIL" },
 ];
