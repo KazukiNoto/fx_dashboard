@@ -226,19 +226,30 @@ const SESSIONS = [
 ];
 
 const sessionsEl = document.getElementById("sessions");
-const clockEl = document.getElementById("clock");
 const phaseEl = document.getElementById("session-phase");
-const clockFormat = new Intl.DateTimeFormat("ja-JP", {
-  timeZone: "Asia/Tokyo",
-  hour: "2-digit",
-  minute: "2-digit",
-  hourCycle: "h23",
-});
+// 各国の現地時刻(夏時間にも追従)。東京は日本時間と同じ
+const localFormats = Object.fromEntries(
+  SESSIONS.map((s) => [
+    s.label,
+    new Intl.DateTimeFormat("ja-JP", {
+      timeZone: s.tz,
+      hour: "2-digit",
+      minute: "2-digit",
+      hourCycle: "h23",
+    }),
+  ])
+);
+// 各セッションを「国旗 + 現地時刻」のチップで常に表示し、オープン中はハイライトする
 const sessionBadges = SESSIONS.map((session) => {
   const badge = document.createElement("span");
   badge.className = "session";
-  badge.textContent = session.label;
   badge.title = `${session.label} ${session.start}:00〜${session.end}:00(現地時間・平日)`;
+  const flag = document.createElement("img");
+  flag.src = `flags/${session.flag}.svg`;
+  flag.alt = "";
+  flag.className = "flag";
+  const time = document.createElement("time");
+  badge.append(flag, time);
   sessionsEl.append(badge);
   const format = new Intl.DateTimeFormat("en-US", {
     timeZone: session.tz,
@@ -246,10 +257,8 @@ const sessionBadges = SESSIONS.map((session) => {
     hour: "numeric",
     hourCycle: "h23",
   });
-  return { session, badge, format };
+  return { session, badge, time, format };
 });
-
-sessionsEl.append(clockEl); // 並び順: 時間帯の文言 → バッジ → 時計(一番右)
 
 function isSessionOpen({ session, format }, now) {
   const parts = Object.fromEntries(
@@ -259,13 +268,6 @@ function isSessionOpen({ session, format }, now) {
   const hour = Number(parts.hour);
   return weekday && hour >= session.start && hour < session.end;
 }
-
-// いま開いているセッションから「今の時間帯」の文言を作る
-const PHASE_NAMES = {
-  東京: "東京時間",
-  ロンドン: "ロンドン時間",
-  NY: "NY時間",
-};
 
 // 次にどれかのセッションが開く時刻(15分刻みで探す。開場は毎時0分なので正確)
 function nextOpening(now) {
@@ -290,19 +292,6 @@ function formatRemaining(ms) {
 
 let phaseMinute = null;
 
-// オープン中のセッションの現地時刻(夏時間にも追従)を文言に添える
-const localFormats = Object.fromEntries(
-  SESSIONS.map((s) => [
-    s.label,
-    new Intl.DateTimeFormat("ja-JP", {
-      timeZone: s.tz,
-      hour: "2-digit",
-      minute: "2-digit",
-      hourCycle: "h23",
-    }),
-  ])
-);
-
 // 閉場中の文言
 function closedLabel(now) {
   const next = nextOpening(now);
@@ -312,40 +301,23 @@ function closedLabel(now) {
   return `閑散時間帯(${next.names[0]}オープンまで ${formatRemaining(ms)})`;
 }
 
-// オープン中のセッションは「国旗 + 現地時刻」で表す(重複時は並べる)。閉場中は文言
+// 閉場中だけ、次の開場までの文言を出す(オープン中はチップのハイライトで分かる)
 function renderPhase(now, openNames) {
-  if (openNames.length === 0) {
-    phaseEl.textContent = closedLabel(now);
-    return;
-  }
-  phaseEl.replaceChildren(
-    ...openNames.map((name) => {
-      const session = SESSIONS.find((s) => s.label === name);
-      const time = localFormats[name].format(now);
-      const item = document.createElement("span");
-      item.className = "phase-item";
-      item.title = `${PHASE_NAMES[name]}(現地 ${time})`;
-      const flag = document.createElement("img");
-      flag.src = `flags/${session.flag}.svg`;
-      flag.alt = name;
-      flag.className = "flag";
-      item.append(flag, time);
-      return item;
-    })
-  );
+  phaseEl.textContent = openNames.length === 0 ? closedLabel(now) : "";
 }
 
 function tickClock() {
   const now = new Date();
-  clockEl.textContent = clockFormat.format(now);
-  clockEl.dateTime = now.toISOString();
   const openNames = [];
   for (const item of sessionBadges) {
     const open = isSessionOpen(item, now);
+    const text = localFormats[item.session.label].format(now);
+    item.time.textContent = text;
+    item.time.dateTime = now.toISOString();
     item.badge.dataset.open = String(open);
     item.badge.setAttribute(
       "aria-label",
-      `${item.session.label} ${open ? "オープン中" : "クローズ"}`
+      `${item.session.label} 現地 ${text} ${open ? "オープン中" : "クローズ"}`
     );
     if (open) openNames.push(item.session.label);
   }

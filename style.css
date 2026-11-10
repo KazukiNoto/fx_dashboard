@@ -161,19 +161,29 @@ main {
   font-weight: 600;
 }
 
-/* オープン中のセッション(国旗 + 現地時刻)。重複時は横に並べる */
-.phase-item {
+#session-phase:empty {
+  display: none;
+}
+
+/* 各国の現地時刻のチップ(国旗 + 時刻)。オープン中は緑でハイライト */
+.session {
   display: inline-flex;
   align-items: center;
-  margin-right: 10px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--muted);
   font-variant-numeric: tabular-nums;
+  opacity: 0.6;
 }
 
-.phase-item:last-child {
-  margin-right: 0;
+.session[data-open="true"] {
+  background: var(--open);
+  color: #fff;
+  font-weight: 600;
+  opacity: 1;
 }
 
-.phase-item .flag {
+.session .flag {
   width: 1.25em;
   height: 0.94em;
   margin-right: 0.4em;
@@ -181,25 +191,7 @@ main {
   outline: 1px solid rgba(128, 128, 128, 0.35); /* 白地の日本の国旗が背景に溶けないように */
 }
 
-#clock {
-  margin-left: 6px;
-  font-variant-numeric: tabular-nums;
-}
-
-.session {
-  padding: 2px 8px;
-  border-radius: 999px;
-  background: var(--muted);
-  opacity: 0.6;
-}
-
-.session[data-open="true"] {
-  background: var(--open);
-  color: #fff;
-  opacity: 1;
-}
-
-/* 狭い画面では時計をさらに下の段に回す */
+/* 狭い画面では各国の時刻をさらに下の段に回す */
 @media (max-width: 600px) {
   #sessions {
     order: 5; /* 狭い画面では通貨ペアの下(3段目)に回す */
@@ -207,10 +199,6 @@ main {
     justify-content: flex-end;
   }
 
-  /* バッジは隠す(時間帯は文言で分かる) */
-  .session {
-    display: none;
-  }
 }
 
 /* 右上のメニュー(バーガーボタン)。中に画面スリープ防止とアプリ更新を入れる */
@@ -335,10 +323,6 @@ main {
   #sessions {
     order: 0;
     flex-basis: auto;
-  }
-
-  .session {
-    display: none;
   }
 
   #menu-wrap {
