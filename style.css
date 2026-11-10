@@ -112,7 +112,7 @@ main {
   grid-auto-flow: column; /* 個数が変わっても1行に並べる */
   grid-auto-columns: minmax(0, 1fr);
   gap: 4px;
-  height: 120px;
+  height: 180px;
 }
 
 #markets .market,

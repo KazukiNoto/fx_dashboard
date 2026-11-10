@@ -139,19 +139,23 @@ function renderMarkets() {
       container.append(widget);
 
       const script = document.createElement("script");
+      // ミニチャート(数字が大きい)ではなく、グラフが主役の小さなチャートにする
       script.src =
-        "https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js";
+        "https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js";
       script.async = true;
       script.textContent = JSON.stringify({
-        symbol,
-        width: "100%",
-        height: "100%",
-        locale: "ja",
-        dateRange: "1D",
-        colorTheme: darkQuery.matches ? "dark" : "light",
-        isTransparent: true,
         autosize: true,
-        largeChartUrl: "",
+        symbol,
+        interval: "15",
+        timezone: "Asia/Tokyo",
+        theme: darkQuery.matches ? "dark" : "light",
+        style: "3", // エリアチャート
+        locale: "ja",
+        allow_symbol_change: false,
+        hide_side_toolbar: true,
+        hide_top_toolbar: true,
+        hide_volume: true,
+        support_host: "https://www.tradingview.com",
       });
       container.append(script);
       return container;
