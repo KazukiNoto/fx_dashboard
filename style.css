@@ -115,6 +115,10 @@ main {
   height: clamp(110px, 22vh, 200px); /* 画面の高さに合わせて縮める */
 }
 
+#markets .market {
+  position: relative; /* 読み込み失敗の表示を重ねる */
+}
+
 #markets .market,
 #markets .tradingview-widget-container__widget {
   height: 100%;
@@ -145,6 +149,33 @@ main {
   color: var(--fg);
   font: inherit;
   font-size: 0.8rem;
+  cursor: pointer;
+}
+
+/* チャートの読み込み失敗表示(時間足セレクトは上に残す) */
+.pane-error {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--bg);
+  font-size: 0.9rem;
+}
+
+.pane-error p { margin: 0; text-align: center; }
+
+#markets .pane-error { font-size: 0.75rem; }
+
+.pane-error button {
+  padding: 4px 12px;
+  border: 0;
+  border-radius: 4px;
+  background: var(--accent);
+  color: #fff;
+  font: inherit;
   cursor: pointer;
 }
 

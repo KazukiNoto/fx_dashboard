@@ -59,7 +59,34 @@ function loadIntervals() {
   }
 }
 
+const LOAD_TIMEOUT_MS = 15000; // この時間内にチャートが出なければ読み込み失敗とみなす
+
 const paneIntervals = loadIntervals();
+
+// 読み込み失敗(スクリプトが取れない・一定時間たってもチャートが出ない)のときは、
+// 空白のままにせず理由と再読み込みボタンを出す
+function watchLoad(container, widget, script, retry) {
+  const showError = () => {
+    if (container.querySelector(".pane-error")) return;
+    const box = document.createElement("div");
+    box.className = "pane-error";
+    box.setAttribute("role", "alert");
+    const text = document.createElement("p");
+    text.textContent = navigator.onLine
+      ? "チャートを読み込めませんでした"
+      : "オフラインのためチャートを表示できません";
+    const button = document.createElement("button");
+    button.type = "button";
+    button.textContent = "再読み込み";
+    button.addEventListener("click", retry);
+    box.append(text, button);
+    container.append(box);
+  };
+  script.addEventListener("error", showError);
+  setTimeout(() => {
+    if (container.isConnected && !widget.querySelector("iframe")) showError();
+  }, LOAD_TIMEOUT_MS);
+}
 
 function createPane(pair, index) {
   const interval = paneIntervals[index];
@@ -95,6 +122,10 @@ function createPane(pair, index) {
     support_host: "https://www.tradingview.com",
   });
   container.append(script);
+
+  watchLoad(container, widget, script, () =>
+    container.replaceWith(createPane(pair, index))
+  );
 
   const select = document.createElement("select");
   select.className = "interval-select";
@@ -158,6 +189,7 @@ function renderMarkets() {
         support_host: "https://www.tradingview.com",
       });
       container.append(script);
+      watchLoad(container, widget, script, renderMarkets);
       return container;
     })
   );
