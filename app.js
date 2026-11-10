@@ -65,7 +65,7 @@ const paneIntervals = loadIntervals();
 
 // 読み込み失敗(スクリプトが取れない・一定時間たってもチャートが出ない)のときは、
 // 空白のままにせず理由と再読み込みボタンを出す
-function watchLoad(container, widget, script, retry) {
+function watchLoad(container, script, retry) {
   const showError = () => {
     if (container.querySelector(".pane-error")) return;
     const box = document.createElement("div");
@@ -84,7 +84,7 @@ function watchLoad(container, widget, script, retry) {
   };
   script.addEventListener("error", showError);
   setTimeout(() => {
-    if (container.isConnected && !widget.querySelector("iframe")) showError();
+    if (container.isConnected && !container.querySelector("iframe")) showError();
   }, LOAD_TIMEOUT_MS);
 }
 
@@ -123,7 +123,7 @@ function createPane(pair, index) {
   });
   container.append(script);
 
-  watchLoad(container, widget, script, () =>
+  watchLoad(container, script, () =>
     container.replaceWith(createPane(pair, index))
   );
 
@@ -189,7 +189,7 @@ function renderMarkets() {
         support_host: "https://www.tradingview.com",
       });
       container.append(script);
-      watchLoad(container, widget, script, renderMarkets);
+      watchLoad(container, script, renderMarkets);
       return container;
     })
   );
