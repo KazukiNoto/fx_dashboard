@@ -11,6 +11,56 @@ const darkQuery = window.matchMedia("(prefers-color-scheme: dark)");
 
 const STORAGE_KEY = "fx-dashboard:pair";
 
+// 表示サイズ。4K テレビのように画素数の多い大画面では、そのままだと文字もチャートの目盛りも
+// 小さすぎて離れた位置から読めない。TradingView のチャートは iframe の中にあり、文字の大きさを
+// 外から変えられないので、画面全体を小さめに組んでから拡大して、チャートごと大きく見せる
+const SCALE_KEY = "fx-dashboard:scale";
+const SCALES = [1, 1.25, 1.5, 1.75, 2, 2.5, 3];
+const scaleSelect = document.getElementById("scale-select");
+
+// 自動: フルHD(1920×1080)相当の見た目になる倍率。4K なら 200%。
+// 普通のパソコンの画面を勝手に拡大しないよう、150% 以上になる大画面だけに効かせる
+function autoScale() {
+  const fit = Math.min(innerWidth / 1920, innerHeight / 1080);
+  return fit >= 1.5 ? Math.min(Math.floor(fit * 4) / 4, 4) : 1;
+}
+
+function savedScale() {
+  try {
+    const saved = Number(localStorage.getItem(SCALE_KEY));
+    return SCALES.includes(saved) ? saved : null;
+  } catch {
+    return null;
+  }
+}
+
+const percent = (scale) => `${Math.round(scale * 100)}%`;
+
+function applyScale() {
+  const auto = autoScale();
+  const saved = savedScale();
+  // 拡大しすぎてレイアウトが崩れないよう、拡大後の画面が 960×540 相当を下回らない範囲に抑える
+  const limit = Math.max(1, Math.min(innerWidth / 960, innerHeight / 540));
+  const scale = Math.min(saved ?? auto, limit);
+  const root = document.documentElement;
+  root.style.setProperty("--ui-scale", scale);
+  root.toggleAttribute("data-scaled", scale !== 1);
+  scaleSelect.options[0].text = `自動(${percent(auto)})`;
+  scaleSelect.value = saved ?? "auto";
+}
+
+scaleSelect.add(new Option("", "auto"));
+for (const scale of SCALES) scaleSelect.add(new Option(percent(scale), scale));
+scaleSelect.addEventListener("change", () => {
+  try {
+    if (scaleSelect.value === "auto") localStorage.removeItem(SCALE_KEY);
+    else localStorage.setItem(SCALE_KEY, scaleSelect.value);
+  } catch {}
+  applyScale();
+});
+window.addEventListener("resize", applyScale);
+applyScale();
+
 function savedLabel() {
   try {
     return localStorage.getItem(STORAGE_KEY);
@@ -242,6 +292,7 @@ function update() {
 // 数字キー 1〜4 で通貨ペアを切り替え
 window.addEventListener("keydown", (e) => {
   if (e.ctrlKey || e.metaKey || e.altKey) return;
+  if (e.target instanceof HTMLSelectElement) return; // セレクトの文字入力での選択を邪魔しない
   const pair = PAIRS[Number(e.key) - 1];
   if (pair) location.hash = encodeURIComponent(pair.label);
 });

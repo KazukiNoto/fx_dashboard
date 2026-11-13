@@ -21,6 +21,29 @@ html, body {
   margin: 0;
 }
 
+/* 大画面(4K テレビなど)向けの拡大表示。倍率 --ui-scale は app.js が決める。
+   画面を 1/倍率 の大きさで組んでから拡大するので、iframe の中のチャートも一緒に大きくなる */
+html[data-scaled] {
+  overflow: hidden;
+}
+
+html[data-scaled] body {
+  width: calc(100% / var(--ui-scale));
+  height: calc(100% / var(--ui-scale));
+  transform: scale(var(--ui-scale));
+  transform-origin: 0 0;
+}
+
+/* リモコンやキーボードで操作するとき、離れた位置からでも選択中の場所が分かるようにする */
+:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+#pairs button[aria-pressed="true"]:focus-visible {
+  outline-color: var(--fg);
+}
+
 body {
   display: flex;
   flex-direction: column;
@@ -51,7 +74,8 @@ h1 {
   order: 3; /* 1段目(タイトル・時計・カレンダー)の下の2段目に置く */
   min-width: 0;
   gap: 6px;
-  padding-bottom: 4px;
+  padding: 4px 4px 6px; /* フォーカスの枠が切れないよう余白を取る */
+  margin: -4px -4px 0;
   overflow-x: auto;
   scrollbar-width: thin;
 }
@@ -276,7 +300,8 @@ main {
   display: none;
 }
 
-#menu button {
+#menu button,
+.menu-row {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -299,6 +324,17 @@ main {
 #menu button:disabled {
   opacity: 0.6;
   cursor: default;
+}
+
+.menu-row select {
+  padding: 2px 4px;
+  border: 0;
+  border-radius: 4px;
+  background: var(--muted);
+  color: inherit;
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
 }
 
 #menu svg {
