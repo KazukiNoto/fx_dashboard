@@ -58,8 +58,42 @@ scaleSelect.addEventListener("change", () => {
   } catch {}
   applyScale();
 });
-window.addEventListener("resize", applyScale);
 applyScale();
+
+// レイアウト。1ペア: 選んだ通貨ペアを上下2つの時間足で見る。4ペア: 4つの通貨ペアを同じ時間足で 2×2 に並べる。
+// 自動では、4K 級の大画面(表示サイズの自動拡大がかかる画面)だけ 4ペアにする
+const LAYOUT_KEY = "fx-dashboard:layout";
+const layoutSelect = document.getElementById("layout-select");
+
+function savedLayout() {
+  try {
+    const saved = localStorage.getItem(LAYOUT_KEY);
+    return saved === "single" || saved === "grid" ? saved : "auto";
+  } catch {
+    return "auto";
+  }
+}
+
+function currentLayout() {
+  const saved = savedLayout();
+  if (saved !== "auto") return saved;
+  return autoScale() > 1 ? "grid" : "single";
+}
+
+function renderLayoutSelect() {
+  const auto = autoScale() > 1 ? "4ペア" : "1ペア";
+  layoutSelect.options[0].text = `自動(${auto})`;
+  layoutSelect.value = savedLayout();
+}
+
+layoutSelect.addEventListener("change", () => {
+  try {
+    if (layoutSelect.value === "auto") localStorage.removeItem(LAYOUT_KEY);
+    else localStorage.setItem(LAYOUT_KEY, layoutSelect.value);
+  } catch {}
+  update();
+});
+renderLayoutSelect();
 
 function savedLabel() {
   try {
@@ -84,6 +118,7 @@ const MACD = { fast: 8, slow: 21, signal: 5 };
 
 const INTERVALS = [
   { value: "1", label: "1分足" },
+  { value: "2", label: "2分足" },
   { value: "5", label: "5分足" },
   { value: "15", label: "15分足" },
   { value: "30", label: "30分足" },
@@ -113,6 +148,20 @@ const LOAD_TIMEOUT_MS = 15000; // この時間内にチャートが出なけれ�
 
 const paneIntervals = loadIntervals();
 
+// 4ペア表示の時間足(4枚共通。初期値: 2分足)
+const GRID_INTERVAL_KEY = "fx-dashboard:grid-interval";
+
+function loadGridInterval() {
+  try {
+    const saved = localStorage.getItem(GRID_INTERVAL_KEY);
+    return INTERVALS.some((i) => i.value === saved) ? saved : "2";
+  } catch {
+    return "2";
+  }
+}
+
+let gridInterval = loadGridInterval();
+
 // 読み込み失敗(スクリプトが取れない・一定時間たってもチャートが出ない)のときは、
 // 空白のままにせず理由と再読み込みボタンを出す
 function watchLoad(container, script, retry) {
@@ -138,8 +187,10 @@ function watchLoad(container, script, retry) {
   }, LOAD_TIMEOUT_MS);
 }
 
-function createPane(pair, index) {
-  const interval = paneIntervals[index];
+// slot: 1ペア表示では上下の位置(0 / 1)、4ペア表示では "grid"
+function createPane(pair, slot) {
+  const grid = slot === "grid";
+  const interval = grid ? gridInterval : paneIntervals[slot];
   const container = document.createElement("div");
   container.className = "tradingview-widget-container";
   const widget = document.createElement("div");
@@ -174,8 +225,22 @@ function createPane(pair, index) {
   container.append(script);
 
   watchLoad(container, script, () =>
-    container.replaceWith(createPane(pair, index))
+    container.replaceWith(createPane(pair, slot))
   );
+
+  const head = document.createElement("div");
+  head.className = "pane-head";
+  if (grid) {
+    // 4ペア表示では、どの通貨ペアのチャートか分かるよう名前を重ねる
+    const label = document.createElement("span");
+    label.className = "pane-label";
+    const flag = document.createElement("img");
+    flag.src = `flags/${pair.flag}.svg`;
+    flag.alt = "";
+    flag.className = "flag";
+    label.append(flag, pair.label);
+    head.append(label);
+  }
 
   const select = document.createElement("select");
   select.className = "interval-select";
@@ -184,19 +249,34 @@ function createPane(pair, index) {
     select.add(new Option(label, value, false, value === interval));
   }
   select.addEventListener("change", () => {
-    paneIntervals[index] = select.value;
+    if (grid) {
+      // 4枚共通なので、全部を作り直す
+      gridInterval = select.value;
+      try {
+        localStorage.setItem(GRID_INTERVAL_KEY, gridInterval);
+      } catch {}
+      renderGrid();
+      return;
+    }
+    paneIntervals[slot] = select.value;
     try {
       localStorage.setItem(INTERVALS_KEY, JSON.stringify(paneIntervals));
     } catch {}
-    container.replaceWith(createPane(pair, index));
+    container.replaceWith(createPane(pair, slot));
   });
-  container.append(select);
+  head.append(select);
+  container.append(head);
   return container;
 }
 
 // 指定ペアを上下2ペインで表示
 function renderChart(pair) {
   chartEl.replaceChildren(createPane(pair, 0), createPane(pair, 1));
+}
+
+// 4つの通貨ペアを 2×2 に並べて表示
+function renderGrid() {
+  chartEl.replaceChildren(...PAIRS.map((pair) => createPane(pair, "grid")));
 }
 
 // 通貨ペアの下に並べる小さなチャート(S&P500・日経平均・原油)。米国債の利回り・先物は、TradingView の埋め込みでは使えないため載せていない。ペアを切り替えても表示したままにする
@@ -276,7 +356,20 @@ navEl.addEventListener(
   { passive: false }
 );
 
+let shownLayout = null;
+
 function update() {
+  const layout = currentLayout();
+  const layoutChanged = layout !== shownLayout;
+  shownLayout = layout;
+  document.documentElement.dataset.layout = layout;
+  renderLayoutSelect();
+  if (layout === "grid") {
+    document.title = "FX Dashboard";
+    // 通貨ペアの切り替え(ハッシュの変更)では、4枚とも出したままなので作り直さない
+    if (layoutChanged) renderGrid();
+    return;
+  }
   const pair = currentPair();
   document.title = `${pair.label} | FX Dashboard`;
   try {
@@ -298,7 +391,16 @@ window.addEventListener("keydown", (e) => {
 });
 
 window.addEventListener("hashchange", update);
-darkQuery.addEventListener("change", update);
+darkQuery.addEventListener("change", () => {
+  shownLayout = null; // 4ペア表示もテーマに合わせて作り直す
+  update();
+});
+// 画面の大きさが変わったら、表示サイズと(自動の)レイアウトを決め直す
+window.addEventListener("resize", () => {
+  applyScale();
+  if (currentLayout() !== shownLayout) update();
+  else renderLayoutSelect();
+});
 darkQuery.addEventListener("change", renderMarkets);
 update();
 renderMarkets();

@@ -161,11 +161,36 @@ main {
   position: relative;
 }
 
-.interval-select {
+.pane-head {
   position: absolute;
   top: 8px;
   left: 10px;
   z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* 4ペア表示で、チャートに重ねる通貨ペアの名前 */
+.pane-label {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.pane-label .flag {
+  width: 1.25em;
+  height: 0.94em;
+  margin-right: 0.4em;
+  border-radius: 2px;
+}
+
+.interval-select {
   padding: 2px 4px;
   border: 0;
   border-radius: 4px;
@@ -411,5 +436,25 @@ main {
 @media (max-height: 520px) and (min-width: 480px) and (max-width: 639px) {
   #session-phase {
     display: none;
+  }
+}
+
+/* 4ペア表示: 4つの通貨ペアを 2×2 に並べる。通貨ペアの切り替えボタンは要らないので隠す */
+html[data-layout="grid"] #pairs {
+  display: none;
+}
+
+html[data-layout="grid"] #chart {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+/* 狭い画面で 4ペア表示を選んだときは、縦に並べてスクロールで見る */
+@media (max-width: 600px) {
+  html[data-layout="grid"] #chart {
+    flex: none;
+    height: auto;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: repeat(4, 260px);
   }
 }
