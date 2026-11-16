@@ -1,6 +1,6 @@
 // アプリの骨組み(HTML/CSS/JS/アイコン)だけをキャッシュする Service Worker。
 // チャートとカレンダーは TradingView から読み込むため、オフラインでは表示されない。
-const CACHE = "fx-dashboard-v5";
+const CACHE = "fx-dashboard-v6";
 const SHELL = [
   "./",
   "index.html",

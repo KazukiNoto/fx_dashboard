@@ -362,6 +362,14 @@ main {
   cursor: pointer;
 }
 
+#screen-info {
+  max-width: 260px;
+  margin: 4px 10px;
+  opacity: 0.6;
+  font-size: 0.7rem;
+  line-height: 1.5;
+}
+
 #menu svg {
   flex-shrink: 0;
 }

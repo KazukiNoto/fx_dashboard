@@ -20,8 +20,19 @@ const scaleSelect = document.getElementById("scale-select");
 
 // 自動: フルHD(1920×1080)相当の見た目になる倍率。4K なら 200%。
 // 普通のパソコンの画面を勝手に拡大しないよう、150% 以上になる大画面だけに効かせる
+// 画面の大きさは、ページを組む領域(レイアウトビューポート)で測る。テレビのブラウザには
+// 窓の大きさ(innerWidth)がこれと食い違うものがあり、そちらで測ると拡大後にはみ出す
+function viewportSize() {
+  const root = document.documentElement;
+  return {
+    width: root.clientWidth || innerWidth,
+    height: root.clientHeight || innerHeight,
+  };
+}
+
 function autoScale() {
-  const fit = Math.min(innerWidth / 1920, innerHeight / 1080);
+  const { width, height } = viewportSize();
+  const fit = Math.min(width / 1920, height / 1080);
   return fit >= 1.5 ? Math.min(Math.floor(fit * 4) / 4, 4) : 1;
 }
 
@@ -40,13 +51,35 @@ function applyScale() {
   const auto = autoScale();
   const saved = savedScale();
   // 拡大しすぎてレイアウトが崩れないよう、拡大後の画面が 960×540 相当を下回らない範囲に抑える
-  const limit = Math.max(1, Math.min(innerWidth / 960, innerHeight / 540));
-  const scale = Math.min(saved ?? auto, limit);
   const root = document.documentElement;
+  root.removeAttribute("data-scaled"); // 拡大前の状態で画面の大きさを測る
+  const { width, height } = viewportSize();
+  const limit = Math.max(1, Math.min(width / 960, height / 540));
+  const scale = Math.min(saved ?? auto, limit);
   root.style.setProperty("--ui-scale", scale);
   root.toggleAttribute("data-scaled", scale !== 1);
   scaleSelect.options[0].text = `自動(${percent(auto)})`;
   scaleSelect.value = saved ?? "auto";
+  renderScreenInfo(scale);
+}
+
+// メニューの一番下に出す、版と画面の情報。テレビなどで表示がおかしいときの手がかりにする
+const APP_VERSION = "v6";
+
+function renderScreenInfo(scale) {
+  const { width, height } = viewportSize();
+  const zoom = window.visualViewport?.scale;
+  document.getElementById("screen-info").textContent = [
+    `版 ${APP_VERSION}`,
+    `画面 ${screen.width}×${screen.height}`,
+    `表示領域 ${width}×${height}`,
+    `窓 ${innerWidth}×${innerHeight}`,
+    `画素比 ${Math.round(devicePixelRatio * 100) / 100}`,
+    zoom ? `ズーム ${Math.round(zoom * 100) / 100}` : null,
+    `拡大 ${percent(scale)}`,
+  ]
+    .filter(Boolean)
+    .join(" ・ ");
 }
 
 scaleSelect.add(new Option("", "auto"));
