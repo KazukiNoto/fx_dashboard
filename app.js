@@ -279,11 +279,10 @@ function renderGrid() {
   chartEl.replaceChildren(...PAIRS.map((pair) => createPane(pair, "grid")));
 }
 
-// 通貨ペアの下に並べる小さなチャート(S&P500・日経平均・原油)。米国債の利回り・先物は、TradingView の埋め込みでは使えないため載せていない。ペアを切り替えても表示したままにする
+// 通貨ペアの下に並べる小さなチャート(S&P500・日経平均)。米国債の利回り・先物は、TradingView の埋め込みでは使えないため載せていない。ペアを切り替えても表示したままにする
 const MARKETS = [
   { label: "S&P500", symbol: "FOREXCOM:SPXUSD" },
   { label: "日経平均", symbol: "OANDA:JP225USD" },
-  { label: "WTI原油", symbol: "TVC:USOIL" },
 ];
 
 const marketsEl = document.getElementById("markets");
