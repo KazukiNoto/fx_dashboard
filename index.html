@@ -39,6 +39,11 @@
             <option value="grid">4ペア</option>
           </select>
         </label>
+        <button id="discord-toggle" type="button" aria-pressed="false">
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M4 4h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H8l-4 4V6a2 2 0 0 1 2-2z"/></svg>
+          <span class="menu-label">Discord</span>
+          <span class="menu-state" id="discord-state">オフ</span>
+        </button>
         <button id="refresh-app" type="button" title="Service Worker とキャッシュを消して読み込み直す">
           <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M17.65 6.35A7.96 7.96 0 0 0 12 4a8 8 0 1 0 7.73 10h-2.08A6 6 0 1 1 12 6c1.66 0 3.14.69 4.22 1.78L13 11h7V4z"/></svg>
           <span class="menu-label">アプリを更新</span>
@@ -46,10 +51,13 @@
       </div>
     </div>
   </header>
+  <div id="content">
   <main>
     <div id="chart" class="tradingview-widget-container"></div>
     <section id="markets" aria-label="S&P500・日経平均"></section>
   </main>
+  <aside id="discord" aria-label="Discord" hidden></aside>
+  </div>
   <script src="app.js"></script>
 </body>
 </html>

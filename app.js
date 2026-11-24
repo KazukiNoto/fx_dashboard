@@ -609,6 +609,76 @@ refreshButton.addEventListener("click", async () => {
   location.reload();
 });
 
+// Discord 埋め込み(WidgetBot)。サーバー ID とチャンネル ID は画面上で入力し、この端末にだけ保存する。
+// 事前にサーバーへ WidgetBot の Bot を招待しておく必要がある(https://widgetbot.io)
+const DISCORD_KEY = "fx-dashboard:discord";
+const discordEl = document.getElementById("discord");
+const discordToggle = document.getElementById("discord-toggle");
+const discordState = document.getElementById("discord-state");
+
+function discordConfig() {
+  try {
+    const c = JSON.parse(localStorage.getItem(DISCORD_KEY));
+    return c && /^\d+$/.test(c.server) && /^\d+$/.test(c.channel) ? c : null;
+  } catch {
+    return null;
+  }
+}
+
+function renderDiscord() {
+  discordEl.replaceChildren();
+  const config = discordConfig();
+  if (config) {
+    const frame = document.createElement("iframe");
+    frame.src = `https://e.widgetbot.io/channels/${config.server}/${config.channel}`;
+    frame.title = "Discord";
+    frame.allow = "clipboard-write";
+    const reset = document.createElement("button");
+    reset.type = "button";
+    reset.id = "discord-reset";
+    reset.textContent = "接続先を変更";
+    reset.addEventListener("click", () => {
+      try { localStorage.removeItem(DISCORD_KEY); } catch {}
+      renderDiscord();
+    });
+    discordEl.append(frame, reset);
+    return;
+  }
+  const form = document.createElement("form");
+  form.innerHTML =
+    '<p>Discord のサーバー ID とチャンネル ID を入力してください(開発者モードで右クリック →「ID をコピー」)。</p>' +
+    '<input name="server" inputmode="numeric" placeholder="サーバー ID" required pattern="\\d+">' +
+    '<input name="channel" inputmode="numeric" placeholder="チャンネル ID" required pattern="\\d+">' +
+    '<button type="submit">表示</button>';
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const data = new FormData(form);
+    try {
+      localStorage.setItem(
+        DISCORD_KEY,
+        JSON.stringify({ server: data.get("server").trim(), channel: data.get("channel").trim() })
+      );
+    } catch {}
+    renderDiscord();
+  });
+  discordEl.append(form);
+}
+
+function setDiscord(on) {
+  discordEl.hidden = !on;
+  discordToggle.setAttribute("aria-pressed", String(on));
+  discordState.textContent = on ? "オン" : "オフ";
+  if (on) renderDiscord();
+  else discordEl.replaceChildren();
+  document.documentElement.toggleAttribute("data-discord", on);
+  try { localStorage.setItem(DISCORD_KEY + ":on", on ? "1" : "0"); } catch {}
+}
+
+discordToggle.addEventListener("click", () => setDiscord(discordEl.hidden));
+try {
+  if (localStorage.getItem(DISCORD_KEY + ":on") === "1") setDiscord(true);
+} catch {}
+
 // PWA: Service Worker を登録(インストール可能にする)
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("sw.js").catch(() => {});
