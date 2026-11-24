@@ -105,13 +105,47 @@ h1 {
   color: #fff;
 }
 
+#content {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  gap: 4px;
+}
+
 main {
   display: flex;
+  min-width: 0;
   flex-direction: column;
   gap: 4px;
   flex: 1;
   min-height: 0;
   overflow-y: auto;
+}
+
+#discord {
+  flex: none;
+  width: min(380px, 40vw);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px;
+  background: var(--muted);
+}
+
+#discord[hidden] { display: none; }
+
+#discord iframe {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  border: 0;
+}
+
+#discord form { display: flex; flex-direction: column; gap: 8px; font-size: 14px; }
+#discord input, #discord button { font: inherit; padding: 8px; }
+
+@media (max-width: 700px) {
+  #discord { position: fixed; inset: 56px 0 0 0; width: auto; z-index: 15; }
 }
 
 #chart,
